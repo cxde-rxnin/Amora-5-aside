@@ -21,14 +21,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Loader2, Plus, Trophy, Calendar } from "lucide-react";
+import { Loader2, Plus, Trophy, Calendar, MoreHorizontal, Pencil } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import CreateTournamentModal from "@/components/tournaments/CreateTournamentModal";
+import EditTournamentModal from "@/components/tournaments/EditTournamentModal";
 
 interface AdminTournament {
   id: string;
   name: string;
+  description?: string;
   format: string;
   status: string;
   maxTeams: number;
+  squadSizeLimit: number;
   registeredTeamCount: number;
   entryFee: number;
   registrationOpen: string;
@@ -64,6 +75,9 @@ export default function AdminTournamentsPage() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingTournament, setEditingTournament] = useState<AdminTournament | null>(null);
 
   const fetchTournaments = useCallback(async () => {
     try {
@@ -149,21 +163,25 @@ export default function AdminTournamentsPage() {
           </h1>
           <p className="mt-1 text-muted-foreground">Manage all tournaments</p>
         </div>
-        <Button asChild>
-          <Link href="/admin/tournaments/create">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Tournament
-          </Link>
+        <Button onClick={() => setCreateModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Tournament
         </Button>
       </div>
+
+      <CreateTournamentModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onSuccess={fetchTournaments}
+      />
 
       {tournaments.length === 0 ? (
         <Card className="mt-8">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Trophy className="h-12 w-12 text-muted-foreground/50" />
             <p className="mt-4 text-lg font-medium">No tournaments yet</p>
-            <Button asChild className="mt-6">
-              <Link href="/admin/tournaments/create">Create Tournament</Link>
+            <Button className="mt-6" onClick={() => setCreateModalOpen(true)}>
+              Create Tournament
             </Button>
           </CardContent>
         </Card>
@@ -237,36 +255,47 @@ export default function AdminTournamentsPage() {
                       <TableCell>{formatDate(t.registrationOpen)}</TableCell>
                       <TableCell>{formatDate(t.registrationClose)}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Generate Fixtures — only shown for open tournaments */}
-                          {t.status === "open" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleGenerateFixtures(t.id)}
-                              disabled={generatingId === t.id}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="sm" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setEditingTournament(t);
+                                setEditModalOpen(true);
+                              }}
                             >
-                              {generatingId === t.id ? (
-                                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                              ) : (
-                                <Calendar className="mr-1 h-3 w-3" />
-                              )}
-                              Fixtures
-                            </Button>
-                          )}
-                          {/* Manage Matches — shown once ongoing or completed */}
-                          {(t.status === "ongoing" ||
-                            t.status === "completed") && (
-                            <Button size="sm" variant="outline" asChild>
-                              <Link
-                                href={`/admin/tournaments/${t.id}/matches`}
-                              >
-                                <Calendar className="mr-1 h-3 w-3" />
-                                Matches
-                              </Link>
-                            </Button>
-                          )}
-                        </div>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            {t.status === "open" && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleGenerateFixtures(t.id)}
+                                  disabled={generatingId === t.id}
+                                >
+                                  <Calendar className="mr-2 h-4 w-4" />
+                                  Generate Fixtures
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            {(t.status === "ongoing" || t.status === "completed") && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/admin/tournaments/${t.id}/matches`}>
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    View Matches
+                                  </Link>
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -276,6 +305,13 @@ export default function AdminTournamentsPage() {
           </CardContent>
         </Card>
       )}
+
+      <EditTournamentModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        onSuccess={fetchTournaments}
+        tournament={editingTournament}
+      />
     </section>
   );
 }

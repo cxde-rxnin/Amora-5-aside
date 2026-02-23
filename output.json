@@ -1,0 +1,45 @@
+{
+  "status": "success",
+  "message": "Transaction fetched successfully",
+  "data": {
+    "id": 10038132,
+    "tx_ref": "AMORA-1771860147598-2j9d93sp",
+    "flw_ref": "FLW-MOCK-37a578bf75af30642cf84a333f85eed4",
+    "device_fingerprint": "9c53d3aa7b77a29767aa5e1a090f51732e58a941663ea61b2e0fe0fae8272b47",
+    "amount": 30000,
+    "currency": "NGN",
+    "charged_amount": 30420,
+    "app_fee": 420,
+    "merchant_fee": 0,
+    "processor_response": "Approved. Successful",
+    "auth_model": "VBVSECURECODE",
+    "ip": "52.209.154.143",
+    "narration": "CARD Transaction ",
+    "status": "successful",
+    "payment_type": "card",
+    "created_at": "2026-02-23T15:22:58.000Z",
+    "account_id": 2592555,
+    "card": {
+      "first_6digits": "418742",
+      "last_4digits": "4246",
+      "issuer": "ACCESS BANK PLC DEBIT CLASSIC",
+      "country": "NIGERIA NG",
+      "type": "VISA",
+      "token": "flw-t1nf-767cc5082ab9fc83d3779692459384e4-m03k",
+      "expiry": "09/32"
+    },
+    "meta": {
+      "__CheckoutInitAddress": "http://localhost:3000/",
+      "bookingId": "699c465c7afd012a366909a7",
+      "paymentId": "699c70b31269f8551bb620df"
+    },
+    "amount_settled": 29968.5,
+    "customer": {
+      "id": 3473266,
+      "name": "Obxd",
+      "phone_number": "08124731527",
+      "email": "ravesb_fb6041fba4357641e05d_obedokemsinachi@gmail.com",
+      "created_at": "2026-02-23T15:16:56.000Z"
+    }
+  }
+}

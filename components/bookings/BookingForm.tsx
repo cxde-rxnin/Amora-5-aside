@@ -39,6 +39,26 @@ export default function BookingForm() {
   const [bookingType, setBookingType] = useState<string>("casual");
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
+
+  // Fetch unavailable dates for the current and next month
+  useEffect(() => {
+    async function loadUnavailableDates() {
+      const today = new Date();
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+      try {
+        const res = await fetch(`/api/bookings/unavailable-dates?start=${start.toISOString()}&end=${end.toISOString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setUnavailableDates(new Set(data.unavailableDates));
+        }
+      } catch (e) {
+        console.error("Failed to load unavailable dates");
+      }
+    }
+    loadUnavailableDates();
+  }, []);
 
   const fetchAvailability = useCallback(async (date: Date) => {
     setLoadingSlots(true);
@@ -162,7 +182,12 @@ export default function BookingForm() {
               disabled={(date) => {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                return date < today;
+                if (date < today) return true;
+
+                // Disable if entirely unavailable
+                // format date as YYYY-MM-DD
+                const dString = new Date(date).toLocaleDateString("en-CA"); // "YYYY-MM-DD" local time safely
+                return unavailableDates.has(dString);
               }}
               className="rounded-md border"
             />
@@ -286,11 +311,11 @@ export default function BookingForm() {
                 <span className="font-medium">
                   {selectedDate
                     ? selectedDate.toLocaleDateString("en-NG", {
-                        weekday: "short",
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
                     : "—"}
                 </span>
               </div>

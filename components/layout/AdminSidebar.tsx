@@ -69,9 +69,6 @@ function SidebarContent({
           <span className="text-xl font-bold text-emerald-400">Amora</span>
         </Link>
         <div className="ml-1 flex flex-col gap-0.5">
-          <span className="text-xs text-slate-400 leading-none">
-            Admin Panel
-          </span>
           <Badge variant="destructive" className="text-[10px] py-0 px-1 h-4">
             Admin
           </Badge>
@@ -125,15 +122,10 @@ function SidebarContent({
             <p className="text-xs text-slate-400 truncate">{user.email}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 mb-3">
-          <Badge variant="destructive" className="text-xs">
-            Admin
-          </Badge>
-        </div>
         <Button
           variant="outline"
           size="sm"
-          className="w-full border-slate-600 text-slate-100 hover:bg-slate-800 hover:text-slate-100"
+          className="w-full border-slate-600 bg-red-600 text-red-100 hover:bg-red-800 hover:text-slate-100"
           onClick={handleLogout}
         >
           <LogOut className="h-4 w-4 mr-2" />

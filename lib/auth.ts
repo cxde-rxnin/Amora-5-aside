@@ -39,10 +39,11 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
 
 export async function setAuthCookie(token: string) {
   const cookieStore = await cookies();
+  const isProd = process.env.NODE_ENV === "production";
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     maxAge: COOKIE_MAX_AGE,
     path: "/",
   });
@@ -50,10 +51,11 @@ export async function setAuthCookie(token: string) {
 
 export async function removeAuthCookie() {
   const cookieStore = await cookies();
+  const isProd = process.env.NODE_ENV === "production";
   cookieStore.set(COOKIE_NAME, "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     maxAge: 0,
     path: "/",
   });

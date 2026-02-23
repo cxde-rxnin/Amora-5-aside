@@ -5,9 +5,9 @@ export const createTournamentSchema = z.object({
   description: z.string().optional(),
   bannerImage: z.string().optional(),
   format: z.string().min(1, "Format is required"),
-  maxTeams: z.number().int().min(2, "Must allow at least 2 teams"),
-  squadSizeLimit: z.number().int().min(1, "Squad size must be at least 1"),
-  entryFee: z.number().min(0, "Entry fee cannot be negative").default(0),
+  maxTeams: z.coerce.number().int().min(2, "Must allow at least 2 teams"),
+  squadSizeLimit: z.coerce.number().int().min(1, "Squad size must be at least 1"),
+  entryFee: z.coerce.number().min(0, "Entry fee cannot be negative").default(0),
   registrationOpen: z.string().min(1, "Registration open date is required"),
   registrationClose: z.string().min(1, "Registration close date is required"),
 });

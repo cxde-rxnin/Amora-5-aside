@@ -63,6 +63,13 @@ export function isWithinOperatingHours(
  * This ensures consistent date comparison across timezones.
  */
 export function normalizeDate(date: Date | string): Date {
+  if (typeof date === "string") {
+    // If it's a YYYY-MM-DD string, parse explicitly avoiding browser timezone drift
+    if (date.includes("-") && date.length === 10) {
+      const [year, month, day] = date.split("-").map(Number);
+      return new Date(Date.UTC(year, month - 1, day));
+    }
+  }
   const d = new Date(date);
   return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
 }
@@ -76,5 +83,8 @@ export function isFutureOrToday(date: Date | string): boolean {
 
 /** Format a date as YYYY-MM-DD for API queries */
 export function formatDateParam(date: Date): string {
-  return date.toISOString().split("T")[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }

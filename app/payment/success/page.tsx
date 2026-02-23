@@ -45,8 +45,13 @@ function PaymentSuccessContent() {
         return;
       }
 
+      const transactionId = searchParams.get("transaction_id");
+      const url = transactionId
+        ? `/api/payments/verify?tx_ref=${txRef}&transaction_id=${transactionId}`
+        : `/api/payments/verify?tx_ref=${txRef}`;
+
       try {
-        const res = await fetch(`/api/payments/verify?tx_ref=${txRef}`);
+        const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           setInfo(data);
@@ -58,7 +63,7 @@ function PaymentSuccessContent() {
       }
     }
     verify();
-  }, [txRef]);
+  }, [txRef, searchParams]);
 
   if (loading) {
     return (

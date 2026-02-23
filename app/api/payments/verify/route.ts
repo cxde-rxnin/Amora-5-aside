@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Payment from "@/models/Payment";
 import Booking from "@/models/Booking";
+import TournamentTeam from "@/models/TournamentTeam";
 import { getCurrentUser } from "@/lib/getCurrentUser";
+import { verifyFlutterwaveTransaction } from "@/lib/flutterwave";
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,6 +39,61 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const transactionId = searchParams.get("transaction_id");
+
+    // If pending and we have a transaction_id from the redirect query params, 
+    // try to verify directly with Flutterwave (useful for local dev without webhooks)
+    if (payment.status === "pending" && transactionId) {
+      try {
+        const verification = await verifyFlutterwaveTransaction(transactionId);
+        console.log("Flutterwave verify API response:", JSON.stringify(verification, null, 2));
+
+        if (
+          verification.status === "success" &&
+          verification.data.status === "successful" &&
+          verification.data.amount >= payment.amount &&
+          verification.data.currency === payment.currency
+        ) {
+          payment.status = "successful";
+          payment.flutterwaveTxId = transactionId;
+          payment.paymentMethod = verification.data.payment_type || "";
+
+          await Payment.findByIdAndUpdate(payment._id, {
+            status: payment.status,
+            flutterwaveTxId: payment.flutterwaveTxId,
+            paymentMethod: payment.paymentMethod
+          });
+
+          // Update the linked entity based on payment type
+          if (payment.paymentType === "tournament_entry") {
+            // Update TournamentTeam paymentStatus
+            if (payment.tournamentTeamId) {
+              await TournamentTeam.findByIdAndUpdate(payment.tournamentTeamId, {
+                paymentStatus: "paid",
+                paymentId: payment._id,
+              });
+            }
+          } else {
+            // Update booking status
+            await Booking.findByIdAndUpdate(payment.bookingId, {
+              status: "confirmed"
+            });
+          }
+        } else {
+          console.log("Verification conditions not met:", {
+            status: verification.status,
+            dataStatus: verification.data?.status,
+            vwAmount: verification.data?.amount,
+            pAmount: payment.amount,
+            vwCur: verification.data?.currency,
+            pCur: payment.currency
+          });
+        }
+      } catch (err) {
+        console.error("Flutterwave verification error:", err);
+      }
+    }
+
     const booking = await Booking.findById(payment.bookingId).lean();
 
     return NextResponse.json({
@@ -51,14 +108,14 @@ export async function GET(request: NextRequest) {
       },
       booking: booking
         ? {
-            id: booking._id.toString(),
-            date: booking.date.toISOString(),
-            startTime: booking.startTime,
-            endTime: booking.endTime,
-            duration: booking.duration,
-            type: booking.type,
-            status: booking.status,
-          }
+          id: booking._id.toString(),
+          date: booking.date.toISOString(),
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          duration: booking.duration,
+          type: booking.type,
+          status: booking.status,
+        }
         : null,
     });
   } catch {

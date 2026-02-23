@@ -34,11 +34,17 @@ export async function GET() {
       status: { $in: ["pending", "successful"] },
     }).lean();
 
-    const paymentMap = new Map(
-      payments
-        .filter((p) => p.bookingId != null)
-        .map((p) => [p.bookingId!.toString(), p])
-    );
+    const paymentMap = new Map();
+    for (const p of payments) {
+      if (p.bookingId) {
+        const id = p.bookingId.toString();
+        // If we already mapped a successful payment, don't overwrite with a pending one
+        if (paymentMap.has(id) && paymentMap.get(id).status === "successful") {
+          continue;
+        }
+        paymentMap.set(id, p);
+      }
+    }
 
     const serialized = bookings.map((b) => {
       const payment = paymentMap.get(b._id.toString());

@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import BlockedSlot from "@/models/BlockedSlot";
 import User from "@/models/User";
+import Payment from "@/models/Payment";
 import { getCurrentUser } from "@/lib/getCurrentUser";
 import { adminCreateBookingSchema } from "@/lib/validations/booking";
 import {
@@ -23,6 +24,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const dateParam = searchParams.get("date");
     const statusParam = searchParams.get("status");
+    const searchParam = searchParams.get("search");
 
     await dbConnect();
 
@@ -32,7 +34,19 @@ export async function GET(request: NextRequest) {
       query.date = normalizeDate(dateParam);
     }
 
-    if (statusParam && ["pending", "confirmed", "cancelled"].includes(statusParam)) {
+    if (searchParam) {
+      const users = await User.find({
+        $or: [
+          { name: { $regex: searchParam, $options: "i" } },
+          { email: { $regex: searchParam, $options: "i" } },
+        ],
+      }).select("_id").lean();
+
+      const userIds = users.map((u) => u._id);
+      query.userId = { $in: userIds };
+    }
+
+    if (statusParam && ["pending", "confirmed", "cancelled", "checked-in"].includes(statusParam)) {
       query.status = statusParam;
     }
 
@@ -41,7 +55,34 @@ export async function GET(request: NextRequest) {
       .populate("userId", "name email phone")
       .lean();
 
+    // Fetch payments for these bookings
+    const bookingIds = bookings.map((b) => b._id);
+    const payments = await Payment.find({
+      bookingId: { $in: bookingIds },
+      status: { $in: ["pending", "successful"] },
+    }).lean();
+
+    const paymentMap = new Map();
+    for (const p of payments) {
+      if (p.bookingId) {
+        const id = p.bookingId.toString();
+        // If we already mapped a successful payment, don't overwrite with a pending one
+        if (paymentMap.has(id) && paymentMap.get(id).status === "successful") {
+          continue;
+        }
+        paymentMap.set(id, p);
+      }
+    }
+
     const serialized = bookings.map((b) => {
+      const payment = paymentMap.get(b._id.toString());
+
+      let finalStatus = b.status;
+      // Override status to confirmed if there's a successful payment and it's currently pending
+      if (finalStatus === "pending" && payment?.status === "successful") {
+        finalStatus = "confirmed";
+      }
+
       const u = b.userId as unknown as {
         _id: { toString(): string };
         name: string;
@@ -52,18 +93,18 @@ export async function GET(request: NextRequest) {
         id: b._id.toString(),
         user: u
           ? {
-              id: u._id.toString(),
-              name: u.name,
-              email: u.email,
-              phone: u.phone,
-            }
+            id: u._id.toString(),
+            name: u.name,
+            email: u.email,
+            phone: u.phone,
+          }
           : null,
         date: b.date.toISOString(),
         startTime: b.startTime,
         endTime: b.endTime,
         duration: b.duration,
         type: b.type,
-        status: b.status,
+        status: finalStatus,
         createdAt: b.createdAt.toISOString(),
       };
     });

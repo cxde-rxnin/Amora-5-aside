@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
 export type BookingType = "casual" | "training" | "team";
-export type BookingStatus = "pending" | "confirmed" | "cancelled";
+export type BookingStatus = "pending" | "confirmed" | "cancelled" | "checked-in";
 
 export interface IBooking extends Document {
   _id: mongoose.Types.ObjectId;
@@ -50,7 +50,7 @@ const bookingSchema = new Schema<IBooking>(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled"],
+      enum: ["pending", "confirmed", "cancelled", "checked-in"],
       default: "pending",
     },
   },

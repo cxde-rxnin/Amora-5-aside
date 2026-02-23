@@ -1,0 +1,30 @@
+{
+  "payment": {
+    "_id": "699c70b31269f8551bb620df",
+    "userId": "699c45ef7afd012a36690994",
+    "bookingId": "699c465c7afd012a366909a7",
+    "paymentType": "booking",
+    "txRef": "AMORA-1771860147598-2j9d93sp",
+    "flutterwaveTxId": null,
+    "amount": 30000,
+    "currency": "NGN",
+    "status": "pending",
+    "paymentMethod": "",
+    "createdAt": "2026-02-23T15:22:27.601Z",
+    "updatedAt": "2026-02-23T15:22:27.601Z",
+    "__v": 0
+  },
+  "booking": {
+    "_id": "699c465c7afd012a366909a7",
+    "userId": "699c45ef7afd012a36690994",
+    "date": "2026-02-27T00:00:00.000Z",
+    "startTime": "11:00",
+    "endTime": "13:00",
+    "duration": 120,
+    "type": "casual",
+    "status": "confirmed",
+    "createdAt": "2026-02-23T12:21:48.443Z",
+    "updatedAt": "2026-02-23T15:40:50.897Z",
+    "__v": 0
+  }
+}

@@ -43,6 +43,8 @@ import {
   ShieldBan,
   Trash2,
   CalendarDays,
+  CheckCircle,
+  Search,
 } from "lucide-react";
 import { formatDateParam } from "@/lib/slots";
 
@@ -72,6 +74,7 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
   pending: "outline",
   confirmed: "default",
   cancelled: "destructive",
+  "checked-in": "secondary",
 };
 
 export default function AdminBookingsPage() {
@@ -80,7 +83,17 @@ export default function AdminBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [filterDate, setFilterDate] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Block slot dialog state
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
@@ -95,6 +108,7 @@ export default function AdminBookingsPage() {
       const params = new URLSearchParams();
       if (filterDate) params.set("date", filterDate);
       if (filterStatus !== "all") params.set("status", filterStatus);
+      if (debouncedSearchQuery) params.set("search", debouncedSearchQuery);
 
       const res = await fetch(`/api/admin/bookings?${params}`);
       if (res.ok) {
@@ -104,7 +118,7 @@ export default function AdminBookingsPage() {
     } catch {
       toast.error("Failed to load bookings");
     }
-  }, [filterDate, filterStatus]);
+  }, [filterDate, filterStatus, debouncedSearchQuery]);
 
   const fetchBlockedSlots = useCallback(async () => {
     try {
@@ -130,23 +144,23 @@ export default function AdminBookingsPage() {
     loadAll();
   }, [fetchBookings, fetchBlockedSlots]);
 
-  async function handleCancelBooking(id: string) {
+  async function handleCheckInBooking(id: string) {
     setCancellingId(id);
     try {
       const res = await fetch(`/api/bookings/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "cancelled" }),
+        body: JSON.stringify({ status: "checked-in" }),
       });
       if (res.ok) {
-        toast.success("Booking cancelled");
+        toast.success("User checked in successfully");
         fetchBookings();
       } else {
         const data = await res.json();
-        toast.error(data.error || "Failed to cancel");
+        toast.error(data.error || "Failed to check in");
       }
     } catch {
-      toast.error("Failed to cancel booking");
+      toast.error("Failed to check in booking");
     } finally {
       setCancellingId(null);
     }
@@ -337,6 +351,44 @@ export default function AdminBookingsPage() {
         </Dialog>
       </div>
 
+      {/* Search */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <Label className="mb-1.5 block text-sm">Search Booking by User</Label>
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Name or email..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setSearchQuery(searchInput);
+                }
+              }}
+            />
+            <Button
+              onClick={() => setSearchQuery(searchInput)}
+              variant="default"
+            >
+              <Search className="mr-2 h-4 w-4" />
+              Search
+            </Button>
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setSearchInput("");
+                  setSearchQuery("");
+                }}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Filters */}
       <Card className="mt-6">
         <CardContent className="pt-6">
@@ -360,6 +412,7 @@ export default function AdminBookingsPage() {
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="checked-in">Checked In</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -398,8 +451,8 @@ export default function AdminBookingsPage() {
                 <CalendarDays className="h-12 w-12 text-muted-foreground/50" />
                 <p className="mt-4 text-lg font-medium">No bookings found</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {filterDate || filterStatus !== "all"
-                    ? "Try adjusting your filters"
+                  {filterDate || filterStatus !== "all" || searchQuery
+                    ? "Try adjusting your filters or search"
                     : "No bookings have been made yet"}
                 </p>
               </CardContent>
@@ -479,19 +532,22 @@ export default function AdminBookingsPage() {
                                   Confirm
                                 </Button>
                               )}
-                              {booking.status !== "cancelled" && (
+                              {booking.status === "confirmed" && new Date(booking.date) <= new Date() && (
                                 <Button
                                   size="sm"
-                                  variant="destructive"
+                                  variant="secondary"
                                   onClick={() =>
-                                    handleCancelBooking(booking.id)
+                                    handleCheckInBooking(booking.id)
                                   }
                                   disabled={cancellingId === booking.id}
                                 >
                                   {cancellingId === booking.id ? (
                                     <Loader2 className="h-3 w-3 animate-spin" />
                                   ) : (
-                                    <Ban className="h-3 w-3" />
+                                    <span className="flex items-center gap-1">
+                                      <CheckCircle className="h-3 w-3" />
+                                      Check In
+                                    </span>
                                   )}
                                 </Button>
                               )}
