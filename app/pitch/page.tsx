@@ -164,7 +164,7 @@ export default function PitchPage() {
             Ready to Play?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">
-            Book your slot today and experience the best 5-aside pitch in Lagos.
+            Book your slot today and experience the best 5-aside pitch in PH.
           </p>
           <Button
             size="lg"

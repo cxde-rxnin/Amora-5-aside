@@ -81,7 +81,7 @@ export async function sendBookingConfirmation(
         <div style="background-color: #f0fdf4; border-radius: 8px; padding: 16px; margin-top: 24px; text-align: center;">
           <p style="color: #166534; margin: 0; font-weight: 600;">See you on the pitch!</p>
           <p style="color: #6b7280; margin: 8px 0 0; font-size: 13px;">
-            Amora Resort, Lekki Phase 1, Lagos
+            Amora Resort, First Mechanics Alakahia, PH
           </p>
         </div>
       </div>

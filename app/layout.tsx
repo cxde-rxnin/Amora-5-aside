@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Amora Resort – 5-Aside Football Pitch | Lagos, Nigeria",
+    default: "Amora Resort – 5-Aside Football Pitch | PH, Nigeria",
     template: "%s | Amora Resort",
   },
   description:

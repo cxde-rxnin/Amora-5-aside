@@ -17,7 +17,7 @@ export default function LocationContact() {
           <div className="overflow-hidden rounded-xl border border-border">
             <iframe
               title="Amora Resort Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.7286792474964!2d3.4853553!3d6.4280556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103bf52e0b4e3b11%3A0x7e5d0d0c0e0e0e0e!2sLekki%20Phase%201%2C%20Lagos!5e0!3m2!1sen!2sng!4v1700000000000!5m2!1sen!2sng"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.7286792474964!2d3.4853553!3d6.4280556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103bf52e0b4e3b11%3A0x7e5d0d0c0e0e0e0e!2sLekki%20Phase%201%2C%20PH!5e0!3m2!1sen!2sng!4v1700000000000!5m2!1sen!2sng"
               width="100%"
               height="400"
               style={{ border: 0 }}
@@ -36,9 +36,9 @@ export default function LocationContact() {
               <div>
                 <h3 className="text-lg font-semibold">Address</h3>
                 <p className="mt-1 text-muted-foreground">
-                  Amora Resort, Lekki Phase 1,
+                  Amora Resort, First Mechanics Alakahia,
                   <br />
-                  Lagos, Nigeria
+                  PH, Nigeria
                 </p>
               </div>
             </div>

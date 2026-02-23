@@ -82,7 +82,7 @@ export default function CreateTeamPage() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Lagos United FC"
+                placeholder="e.g. PH United FC"
                 maxLength={50}
                 className="mt-1.5"
               />

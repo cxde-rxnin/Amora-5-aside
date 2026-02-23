@@ -43,7 +43,7 @@ export default function TournamentsPreview() {
             Upcoming Tournaments
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Compete against the best teams in Lagos. Register your squad and
+            Compete against the best teams in PH. Register your squad and
             battle for glory.
           </p>
         </div>
