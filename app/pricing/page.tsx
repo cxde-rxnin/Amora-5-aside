@@ -87,15 +87,22 @@ export default function PricingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-muted/50 py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+      <section className="relative flex h-[50vh] items-center justify-center overflow-hidden bg-[#0a1a0f]">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          style={{
+            backgroundImage: "url('/images/pricing.jpg')",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a1a0f] via-transparent to-transparent" />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
             Pricing
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">
+          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
             Simple, Transparent Pricing
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-300">
             No hidden fees. No surprises. Just pick your time and play.
           </p>
         </div>

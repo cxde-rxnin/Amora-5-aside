@@ -8,7 +8,7 @@ export default function Hero() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=2071&auto=format&fit=crop')",
+            "url('/images/amora.jpg')",
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0a1a0f] via-[#0a1a0f]/60 to-transparent" />

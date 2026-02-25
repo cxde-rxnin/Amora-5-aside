@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description:
     "Explore the features of Amora Resort's premium 5-aside football pitch — FIFA-standard turf, professional floodlights, and world-class facilities.",
 };
-
+import { Carousel, Card as CarouselCard } from "@/components/ui/apple-cards-carousel";
 const galleryImages = [
   {
     src: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=800&auto=format&fit=crop",
@@ -37,6 +37,30 @@ const galleryImages = [
     alt: "Players in action",
   },
 ];
+
+const galleryCards = galleryImages.map((image, index) => (
+  <CarouselCard
+    key={index}
+    card={{
+      src: image.src,
+      title: image.alt,
+      category: "Amora Pitch",
+      content: (
+        <div className="flex flex-col gap-4">
+          <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-2xl font-sans max-w-3xl mx-auto">
+            {image.alt}
+          </p>
+          <img
+            src={image.src}
+            alt={image.alt}
+            className="w-full h-auto rounded-xl object-contain"
+          />
+        </div>
+      ),
+    }}
+    index={index}
+  />
+));
 
 const features = [
   { icon: Zap, title: "Premium Artificial Turf", description: "FIFA-quality synthetic grass for optimal ball control and player safety." },
@@ -93,19 +117,8 @@ export default function PitchPage() {
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Pitch Gallery
           </h2>
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {galleryImages.map((image) => (
-              <div
-                key={image.alt}
-                className="overflow-hidden rounded-xl border border-border"
-              >
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="h-56 w-full object-cover transition-transform duration-300 hover:scale-105"
-                />
-              </div>
-            ))}
+          <div className="mt-8">
+            <Carousel items={galleryCards} />
           </div>
         </div>
       </section>

@@ -15,15 +15,22 @@ export default function ContactPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-muted/50 py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+      <section className="relative flex h-[50vh] items-center justify-center overflow-hidden bg-[#0a1a0f]">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          style={{
+            backgroundImage: "url('/images/contact.jpg')",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a1a0f] via-transparent to-transparent" />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
             Get in Touch
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">
+          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
             Contact Us
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-300">
             Have a question about bookings, tournaments, or our facilities? We&apos;d
             love to hear from you.
           </p>
@@ -142,7 +149,7 @@ export default function ContactPage() {
                     href="tel:+2341234567890"
                     className="mt-1 block text-muted-foreground transition-colors hover:text-primary"
                   >
-                    +234 123 456 7890
+                    +234 913 654 8549
                   </a>
                 </div>
               </div>
@@ -181,16 +188,10 @@ export default function ContactPage() {
 
               {/* Map */}
               <div className="overflow-hidden rounded-xl border border-border">
-                <iframe
-                  title="Amora Resort Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.7286792474964!2d3.4853553!3d6.4280556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103bf52e0b4e3b11%3A0x7e5d0d0c0e0e0e0e!2sLekki%20Phase%201%2C%20PH!5e0!3m2!1sen!2sng!4v1700000000000!5m2!1sen!2sng"
-                  width="100%"
-                  height="300"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="h-[250px] w-full lg:h-[300px]"
+                <img
+                  alt="Amora Resort Location"
+                  src="/images/resort.jpg"
+                  className="h-[250px] w-full object-cover lg:h-[300px]"
                 />
               </div>
             </div>

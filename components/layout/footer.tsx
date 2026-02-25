@@ -61,7 +61,7 @@ export default function Footer() {
                   href="tel:+2341234567890"
                   className="transition-colors hover:text-primary"
                 >
-                  +234 123 456 7890
+                  +234 913 654 8549
                 </a>
               </li>
               <li>
