@@ -12,6 +12,7 @@ import {
 } from "@/lib/flutterwave";
 import User from "@/models/User";
 import mongoose from "mongoose";
+import { sendTournamentRegistrationEmail } from "@/lib/email";
 
 export async function POST(
   request: NextRequest,
@@ -119,6 +120,16 @@ export async function POST(
         registeredAt: new Date(),
       });
 
+      // Send confirmation email (non-blocking)
+      sendTournamentRegistrationEmail({
+        to: user.email,
+        captainName: user.name,
+        teamName: team.name,
+        tournamentName: tournament.name,
+        entryFee: 0,
+        isPaid: true,
+      }).catch(console.error);
+
       return NextResponse.json({ registered: true, paymentRequired: false });
     }
 
@@ -165,6 +176,17 @@ export async function POST(
         description: `${tournament.name} — ${team.name}`,
       },
     });
+
+    // Send initiation email (non-blocking)
+    sendTournamentRegistrationEmail({
+      to: user.email,
+      captainName: user.name,
+      teamName: team.name,
+      tournamentName: tournament.name,
+      entryFee: tournament.entryFee,
+      isPaid: false,
+      paymentLink: flwResponse.data.link,
+    }).catch(console.error);
 
     return NextResponse.json({
       registered: true,

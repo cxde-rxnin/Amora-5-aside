@@ -6,6 +6,7 @@ export interface ITeam extends Document {
   captainId: mongoose.Types.ObjectId;
   logo?: string;
   description?: string;
+  inviteCode: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +33,11 @@ const teamSchema = new Schema<ITeam>(
       type: String,
       trim: true,
       maxlength: [300, "Description cannot exceed 300 characters"],
+    },
+    inviteCode: {
+      type: String,
+      unique: true,
+      index: true,
     },
   },
   {

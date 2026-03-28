@@ -144,7 +144,7 @@ export default function UserBookingsPage() {
   }
 
   return (
-    <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+    <section className="mx-auto px-4 py-4 sm:px-6 lg:px-4">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Bookings</h1>

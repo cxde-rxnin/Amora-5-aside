@@ -10,6 +10,7 @@ import {
   initiateFlutterwavePayment,
 } from "@/lib/flutterwave";
 import { paymentLimiter } from "@/lib/rateLimit";
+import { sendBookingInitiatedEmail } from "@/lib/email";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate amount
-    const amount = calculateBookingAmount(booking.startTime, booking.duration);
+    const amount = await calculateBookingAmount(booking.startTime, booking.duration, booking.date);
     const txRef = generateTxRef();
 
     // Create payment record
@@ -120,6 +121,18 @@ export async function POST(request: NextRequest) {
         { status: 502 }
       );
     }
+
+    // Send initiation email (non-blocking)
+    sendBookingInitiatedEmail({
+      to: user.email,
+      customerName: user.name,
+      date: booking.date.toISOString(),
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      duration: booking.duration,
+      amount,
+      paymentLink: flwResponse.data.link,
+    }).catch(console.error);
 
     return NextResponse.json({
       message: "Payment initiated",

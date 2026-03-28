@@ -76,10 +76,13 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
+    const { generateInviteCode } = await import("@/lib/teams");
+
     const team = await Team.create({
       name: result.data.name,
       description: result.data.description,
       captainId: user.id,
+      inviteCode: generateInviteCode(),
     });
 
     // Add the creator as captain

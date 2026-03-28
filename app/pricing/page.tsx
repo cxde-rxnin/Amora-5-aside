@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
+import dbConnect from "@/lib/mongodb";
+import SiteConfig from "@/models/SiteConfig";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -11,79 +13,90 @@ export const metadata: Metadata = {
     "Transparent pricing for Amora Resort's 5-aside football pitch. Off-peak and peak hour rates with no hidden fees.",
 };
 
-const pricingPlans = [
-  {
-    title: "Off-Peak",
-    price: "15,000",
-    period: "per hour",
-    timeSlot: "Monday – Friday, 8:00 AM – 4:00 PM",
-    description: "Perfect for daytime games when the pitch is quieter.",
-    features: [
-      "Full pitch access",
-      "Changing rooms & showers",
-      "Free parking",
-      "Wi-Fi access",
-      "Water dispenser",
-    ],
-  },
-  {
-    title: "Peak Hours",
-    price: "25,000",
-    period: "per hour",
-    timeSlot: "Mon–Fri 4 PM–10 PM & All Weekends",
-    description: "Prime time with full floodlights for evening play.",
-    features: [
-      "Full pitch access",
-      "Professional floodlights",
-      "Changing rooms & showers",
-      "Free parking",
-      "Wi-Fi access",
-      "Water dispenser",
-    ],
-    highlighted: true,
-  },
-  {
-    title: "Weekend Full Day",
-    price: "150,000",
-    period: "8 hours",
-    timeSlot: "Saturday or Sunday, 8:00 AM – 4:00 PM",
-    description: "Book the entire pitch for a full day — ideal for events.",
-    features: [
-      "8 hours of pitch access",
-      "Professional floodlights",
-      "Changing rooms & showers",
-      "Free parking",
-      "Wi-Fi access",
-      "Dedicated staff support",
-      "Water & refreshments area",
-    ],
-  },
-];
+async function getSiteConfig() {
+  await dbConnect();
+  let config = await SiteConfig.findOne().lean();
+  if (!config) {
+    config = await SiteConfig.create({});
+  }
+  return JSON.parse(JSON.stringify(config));
+}
 
-const faqs = [
-  {
-    question: "What's included in the price?",
-    answer:
-      "All bookings include full pitch access, changing rooms, showers, parking, and Wi-Fi. Peak hour bookings also include professional floodlights.",
-  },
-  {
-    question: "Is there a deposit required?",
-    answer:
-      "No deposits — full payment is made at the time of booking to secure your slot.",
-  },
-  {
-    question: "Can I cancel or reschedule?",
-    answer:
-      "Cancellations made 24+ hours before your slot receive a full refund. Rescheduling is free up to 12 hours before your booking.",
-  },
-  {
-    question: "Are there discounts for regular bookings?",
-    answer:
-      "Yes! Teams that book weekly recurring slots receive a 10% discount. Contact us for details.",
-  },
-];
+export default async function PricingPage() {
+  const config = await getSiteConfig();
 
-export default function PricingPage() {
+  const pricingPlans = [
+    {
+      title: "Off-Peak",
+      price: config.pitchOffPeakPrice.toLocaleString(),
+      period: "per hour",
+      timeSlot: "Monday – Friday, 8:00 AM – 4:00 PM",
+      description: "Perfect for daytime games when the pitch is quieter.",
+      features: [
+        "Full pitch access",
+        "Changing rooms & showers",
+        "Free parking",
+        "Wi-Fi access",
+        "Water dispenser",
+      ],
+    },
+    {
+      title: "Peak Hours",
+      price: config.pitchPeakPrice.toLocaleString(),
+      period: "per hour",
+      timeSlot: "Mon–Fri 4 PM–10 PM & All Weekends",
+      description: "Prime time with full floodlights for evening play.",
+      features: [
+        "Full pitch access",
+        "Professional floodlights",
+        "Changing rooms & showers",
+        "Free parking",
+        "Wi-Fi access",
+        "Water dispenser",
+      ],
+      highlighted: true,
+    },
+    {
+      title: "Weekend Full Day",
+      price: (config.pitchWeekendPrice * 8 * 0.8).toLocaleString(), // Example discount for full day
+      period: "8 hours",
+      timeSlot: "Saturday or Sunday, 8:00 AM – 4:00 PM",
+      description: "Book the entire pitch for a full day — ideal for events.",
+      features: [
+        "8 hours of pitch access",
+        "Professional floodlights",
+        "Changing rooms & showers",
+        "Free parking",
+        "Wi-Fi access",
+        "Dedicated staff support",
+        "Water & refreshments area",
+      ],
+    },
+  ];
+
+  const faqs = [
+    {
+      question: "What's included in the price?",
+      answer:
+        "All bookings include full pitch access, changing rooms, showers, parking, and Wi-Fi. Peak hour bookings also include professional floodlights.",
+    },
+    {
+      question: "Is there a deposit required?",
+      answer:
+        "No deposits — full payment is made at the time of booking to secure your slot.",
+    },
+    {
+      question: "Can I cancel or reschedule?",
+      answer:
+        "Cancellations made 24+ hours before your slot receive a full refund. Rescheduling is free up to 12 hours before your booking.",
+    },
+    {
+      question: "Are there discounts for regular bookings?",
+      answer:
+        "Yes! Teams that book weekly recurring slots receive a 10% discount. Contact us for details.",
+    },
+  ];
+
   return (
     <>
       {/* Hero */}
@@ -176,9 +189,9 @@ export default function PricingPage() {
             </h2>
             <p className="mt-4 text-muted-foreground">
               Tournament pricing varies depending on the event. Entry fees
-              typically range from{" "}
+              typically start from{" "}
               <span className="font-semibold text-foreground">
-                NGN 20,000 – 50,000 per team
+                NGN {config.tournamentEntryFee.toLocaleString()} per team
               </span>
               . Each tournament page will display specific pricing and prize pool
               details.

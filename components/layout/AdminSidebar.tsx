@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,9 @@ const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Analytics", href: "/admin/dashboard" },
   { icon: CalendarDays, label: "Bookings", href: "/admin/bookings" },
   { icon: Trophy, label: "Tournaments", href: "/admin/tournaments" },
+  { icon: Users, label: "Teams", href: "/admin/teams" },
   { icon: CreditCard, label: "Payments", href: "/admin/payments" },
+  { icon: Globe, label: "Content Mgmt", href: "/admin/content" },
   { icon: ScrollText, label: "Audit Logs", href: "/admin/audit-logs" },
 ];
 
@@ -84,11 +87,10 @@ function SidebarContent({
               key={href}
               href={href}
               onClick={onNavigate}
-              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-                isActive
+              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${isActive
                   ? "bg-emerald-600 text-white font-medium"
                   : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
-              }`}
+                }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
               {label}

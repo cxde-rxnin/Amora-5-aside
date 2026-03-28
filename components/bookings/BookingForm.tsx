@@ -40,25 +40,64 @@ export default function BookingForm() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
+  const [siteConfig, setSiteConfig] = useState<{
+    pitchOffPeakPrice: number;
+    pitchPeakPrice: number;
+    pitchWeekendPrice: number;
+  } | null>(null);
+  const [calculatedAmount, setCalculatedAmount] = useState<number>(0);
 
-  // Fetch unavailable dates for the current and next month
+  // Fetch site config and unavailable dates
   useEffect(() => {
-    async function loadUnavailableDates() {
+    async function loadData() {
       const today = new Date();
       const start = new Date(today.getFullYear(), today.getMonth(), 1);
       const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+
       try {
-        const res = await fetch(`/api/bookings/unavailable-dates?start=${start.toISOString()}&end=${end.toISOString()}`);
-        if (res.ok) {
-          const data = await res.json();
+        const [datesRes, configRes] = await Promise.all([
+          fetch(`/api/bookings/unavailable-dates?start=${start.toISOString()}&end=${end.toISOString()}`),
+          fetch("/api/config")
+        ]);
+
+        if (datesRes.ok) {
+          const data = await datesRes.json();
           setUnavailableDates(new Set(data.unavailableDates));
         }
+
+        if (configRes.ok) {
+          const data = await configRes.json();
+          setSiteConfig(data.config);
+        }
       } catch (e) {
-        console.error("Failed to load unavailable dates");
+        console.error("Failed to load initial data");
       }
     }
-    loadUnavailableDates();
+    loadData();
   }, []);
+
+  // Recalculate price when selection changes
+  useEffect(() => {
+    if (!selectedSlot || !siteConfig || !selectedDate) {
+      setCalculatedAmount(0);
+      return;
+    }
+
+    const hour = parseInt(selectedSlot.split(":")[0], 10);
+    const isWeekend = selectedDate.getDay() === 0 || selectedDate.getDay() === 6;
+
+    let hourlyRate: number;
+    if (isWeekend) {
+      hourlyRate = siteConfig.pitchWeekendPrice || 25000;
+    } else {
+      const isPeak = hour >= 16;
+      hourlyRate = isPeak
+        ? (siteConfig.pitchPeakPrice || 20000)
+        : (siteConfig.pitchOffPeakPrice || 15000);
+    }
+
+    setCalculatedAmount(hourlyRate * (duration / 60));
+  }, [selectedSlot, duration, selectedDate, siteConfig]);
 
   const fetchAvailability = useCallback(async (date: Date) => {
     setLoadingSlots(true);
@@ -342,6 +381,16 @@ export default function BookingForm() {
             </div>
 
             <Separator />
+
+            {selectedSlot && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-lg font-bold">
+                  <span>Total Amount</span>
+                  <span>NGN {calculatedAmount.toLocaleString()}</span>
+                </div>
+                <Separator />
+              </div>
+            )}
 
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Status</span>

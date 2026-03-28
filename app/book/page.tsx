@@ -1,8 +1,34 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import BookingForm from "@/components/bookings/BookingForm";
+import { Loader2 } from "lucide-react";
 
 export default function BookPage() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => {
+        if (!r.ok) {
+          router.replace("/login?callbackUrl=/book");
+        } else {
+          setChecking(false);
+        }
+      })
+      .catch(() => router.replace("/login?callbackUrl=/book"));
+  }, [router]);
+
+  if (checking) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Hero */}

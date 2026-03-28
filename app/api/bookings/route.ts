@@ -46,22 +46,25 @@ export async function GET() {
       }
     }
 
-    const serialized = bookings.map((b) => {
-      const payment = paymentMap.get(b._id.toString());
-      return {
-        id: b._id.toString(),
-        date: b.date.toISOString(),
-        startTime: b.startTime,
-        endTime: b.endTime,
-        duration: b.duration,
-        type: b.type,
-        status: b.status,
-        amount: calculateBookingAmount(b.startTime, b.duration),
-        paymentStatus: payment?.status || null,
-        txRef: payment?.txRef || null,
-        createdAt: b.createdAt.toISOString(),
-      };
-    });
+    const serialized = await Promise.all(
+      bookings.map(async (b) => {
+        const payment = paymentMap.get(b._id.toString());
+        const amount = await calculateBookingAmount(b.startTime, b.duration, b.date);
+        return {
+          id: b._id.toString(),
+          date: b.date.toISOString(),
+          startTime: b.startTime,
+          endTime: b.endTime,
+          duration: b.duration,
+          type: b.type,
+          status: b.status,
+          amount,
+          paymentStatus: payment?.status || null,
+          txRef: payment?.txRef || null,
+          createdAt: b.createdAt.toISOString(),
+        };
+      })
+    );
 
     return NextResponse.json({ bookings: serialized });
   } catch {

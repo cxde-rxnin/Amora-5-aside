@@ -3,12 +3,14 @@ import dbConnect from "@/lib/mongodb";
 import Payment from "@/models/Payment";
 import Booking from "@/models/Booking";
 import TournamentTeam from "@/models/TournamentTeam";
+import Tournament from "@/models/Tournament";
+import Team from "@/models/Team";
 import User from "@/models/User";
 import {
   verifyWebhookSignature,
   verifyFlutterwaveTransaction,
 } from "@/lib/flutterwave";
-import { sendBookingConfirmation } from "@/lib/email";
+import { sendBookingConfirmation, sendTournamentRegistrationEmail } from "@/lib/email";
 
 const WEBHOOK_SECRET = process.env.FLUTTERWAVE_WEBHOOK_SECRET!;
 
@@ -98,6 +100,28 @@ export async function POST(request: NextRequest) {
           tournamentTeam.paymentStatus = "paid";
           tournamentTeam.paymentId = payment._id;
           await tournamentTeam.save();
+
+          // Step 7: Send tournament confirmation email (non-blocking)
+          try {
+            const [user, tournament, team] = await Promise.all([
+              User.findById(payment.userId).lean(),
+              Tournament.findById(tournamentTeam.tournamentId).lean(),
+              Team.findById(tournamentTeam.teamId).lean(),
+            ]);
+
+            if (user && tournament && team) {
+              sendTournamentRegistrationEmail({
+                to: user.email,
+                captainName: user.name,
+                teamName: team.name,
+                tournamentName: tournament.name,
+                entryFee: tournament.entryFee,
+                isPaid: true,
+              }).catch(console.error);
+            }
+          } catch (err) {
+            console.error("Tournament email prep error:", err);
+          }
         }
       }
     } else {

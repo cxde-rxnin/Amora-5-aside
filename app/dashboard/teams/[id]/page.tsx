@@ -40,6 +40,7 @@ import {
   Trash2,
   UserCircle,
   Users,
+  Copy,
 } from "lucide-react";
 
 interface TeamInfo {
@@ -48,6 +49,7 @@ interface TeamInfo {
   description: string | null;
   captainId: string;
   myRole: string;
+  inviteCode: string;
   createdAt: string;
 }
 
@@ -207,7 +209,7 @@ export default function TeamDetailPage() {
       {/* Team Header */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <CardTitle className="text-2xl">{team.name}</CardTitle>
               {team.description && (
@@ -224,17 +226,44 @@ export default function TeamDetailPage() {
                 })}
               </p>
             </div>
-            <Badge
-              variant={isCaptain ? "default" : "secondary"}
-              className="gap-1"
-            >
-              {isCaptain ? (
-                <Crown className="h-3 w-3" />
-              ) : (
-                <Shield className="h-3 w-3" />
+            <div className="flex flex-col items-end gap-2">
+              <Badge
+                variant={isCaptain ? "default" : "secondary"}
+                className="gap-1"
+              >
+                {isCaptain ? (
+                  <Crown className="h-3 w-3" />
+                ) : (
+                  <Shield className="h-3 w-3" />
+                )}
+                {team.myRole === "captain" ? "Captain" : "Player"}
+              </Badge>
+
+              {isCaptain && (
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="relative">
+                    <Input
+                      readOnly
+                      value={`${window.location.origin}/join/${team.inviteCode}`}
+                      className="h-8 w-[200px] pr-10 text-xs"
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="absolute right-0 top-0 h-8 px-2"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `${window.location.origin}/join/${team.inviteCode}`
+                        );
+                        toast.success("Invite link copied!");
+                      }}
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
               )}
-              {team.myRole === "captain" ? "Captain" : "Player"}
-            </Badge>
+            </div>
           </div>
         </CardHeader>
       </Card>

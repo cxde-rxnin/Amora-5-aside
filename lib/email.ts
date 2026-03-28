@@ -1,4 +1,11 @@
 import nodemailer from "nodemailer";
+import {
+  welcomeTemplate,
+  bookingInitiatedTemplate,
+  bookingConfirmedTemplate,
+  tournamentJoinedTemplate,
+  teamJoinTemplate
+} from "./email-templates";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -9,6 +16,23 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASS,
   },
 });
+
+/**
+ * Send a welcome email to a new user.
+ */
+export async function sendWelcomeEmail(to: string, name: string): Promise<void> {
+  const html = welcomeTemplate(name);
+  try {
+    await transporter.sendMail({
+      from: `"Amora Resort" <${process.env.SMTP_USER || "noreply@amoraresort.com"}>`,
+      to,
+      subject: "Welcome to Amora Resort!",
+      html,
+    });
+  } catch (error) {
+    console.error("Failed to send welcome email:", error);
+  }
+}
 
 interface BookingConfirmationData {
   to: string;
@@ -21,6 +45,9 @@ interface BookingConfirmationData {
   amount: number;
 }
 
+/**
+ * Send booking confirmation email.
+ */
 export async function sendBookingConfirmation(
   data: BookingConfirmationData
 ): Promise<void> {
@@ -42,47 +69,143 @@ export async function sendBookingConfirmation(
     day: "numeric",
   });
 
+  const html = bookingConfirmedTemplate({
+    customerName,
+    date: formattedDate,
+    time: `${startTime} – ${endTime}`,
+    duration: duration === 60 ? "1 Hour" : "2 Hours",
+    amount,
+    txRef,
+  });
+
+  try {
+    await transporter.sendMail({
+      from: `"Amora Resort" <${process.env.SMTP_USER || "noreply@amoraresort.com"}>`,
+      to,
+      subject: `Booking Confirmed – ${formattedDate} at ${startTime}`,
+      html,
+    });
+  } catch (error) {
+    console.error("Failed to send booking confirmation email:", error);
+  }
+}
+
+/**
+ * Send "Payment Required" email after initiating a booking.
+ */
+export async function sendBookingInitiatedEmail(data: {
+  to: string;
+  customerName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  amount: number;
+  paymentLink: string;
+}): Promise<void> {
+  const formattedDate = new Date(data.date).toLocaleDateString("en-NG", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  const html = bookingInitiatedTemplate({
+    customerName: data.customerName,
+    date: formattedDate,
+    time: `${data.startTime} – ${data.endTime}`,
+    duration: data.duration === 60 ? "1 Hour" : "2 Hours",
+    amount: data.amount,
+    paymentLink: data.paymentLink,
+  });
+
+  try {
+    await transporter.sendMail({
+      from: `"Amora Resort" <${process.env.SMTP_USER || "noreply@amoraresort.com"}>`,
+      to: data.to,
+      subject: "Complete Your Booking – Amora Resort",
+      html,
+    });
+  } catch (error) {
+    console.error("Failed to send booking initiated email:", error);
+  }
+}
+
+/**
+ * Send tournament registration email.
+ */
+export async function sendTournamentRegistrationEmail(data: {
+  to: string;
+  captainName: string;
+  teamName: string;
+  tournamentName: string;
+  entryFee: number;
+  isPaid: boolean;
+  paymentLink?: string;
+}): Promise<void> {
+  const html = tournamentJoinedTemplate(data);
+  try {
+    await transporter.sendMail({
+      from: `"Amora Tournaments" <${process.env.SMTP_USER || "noreply@amoraresort.com"}>`,
+      to: data.to,
+      subject: data.isPaid ? `Tournament Registration Confirmed: ${data.tournamentName}` : `Payment Pending: ${data.tournamentName} Registration`,
+      html,
+    });
+  } catch (error) {
+    console.error("Failed to send tournament registration email:", error);
+  }
+}
+
+/**
+ * Send team join notification to captain.
+ */
+export async function sendTeamJoinEmail(data: {
+  to: string;
+  playerName: string;
+  teamName: string;
+  captainName: string;
+}): Promise<void> {
+  const html = teamJoinTemplate(data);
+  try {
+    await transporter.sendMail({
+      from: `"Amora Teams" <${process.env.SMTP_USER || "noreply@amoraresort.com"}>`,
+      to: data.to,
+      subject: `New Player Joined: ${data.teamName}`,
+      html,
+    });
+  } catch (error) {
+    console.error("Failed to send team join email:", error);
+  }
+}
+
+interface ContactEmailData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+}
+
+export async function sendContactEmail(data: ContactEmailData): Promise<void> {
+  const { firstName, lastName, email, phone, subject, message } = data;
+
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background-color: #0d4a2e; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
         <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Amora Resort</h1>
-        <p style="color: #4ade80; margin: 8px 0 0; font-size: 14px;">5-Aside Football Pitch</p>
+        <p style="color: #4ade80; margin: 8px 0 0; font-size: 14px;">New Contact Message</p>
       </div>
 
       <div style="background-color: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
-        <h2 style="color: #111827; margin: 0 0 8px;">Booking Confirmed!</h2>
-        <p style="color: #6b7280; margin: 0 0 24px;">
-          Hi ${customerName}, your pitch booking has been confirmed. Here are the details:
-        </p>
-
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">Date</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-align: right; font-weight: 600; color: #111827;">${formattedDate}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">Time</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-align: right; font-weight: 600; color: #111827;">${startTime} – ${endTime}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">Duration</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-align: right; font-weight: 600; color: #111827;">${duration === 60 ? "1 Hour" : "2 Hours"}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">Amount Paid</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-align: right; font-weight: 600; color: #111827;">NGN ${amount.toLocaleString()}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Reference</td>
-            <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #111827; font-size: 12px;">${txRef}</td>
-          </tr>
-        </table>
-
-        <div style="background-color: #f0fdf4; border-radius: 8px; padding: 16px; margin-top: 24px; text-align: center;">
-          <p style="color: #166534; margin: 0; font-weight: 600;">See you on the pitch!</p>
-          <p style="color: #6b7280; margin: 8px 0 0; font-size: 13px;">
-            Amora Resort, First Mechanics Alakahia, PH
-          </p>
+        <h2 style="color: #111827; margin: 0 0 16px;">Contact Form Submission</h2>
+        
+        <p><strong>From:</strong> ${firstName} ${lastName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        
+        <div style="margin-top: 24px; padding: 16px; background-color: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+          <p style="margin: 0; white-space: pre-wrap;">${message}</p>
         </div>
       </div>
 
@@ -94,13 +217,14 @@ export async function sendBookingConfirmation(
 
   try {
     await transporter.sendMail({
-      from: `"Amora Resort" <${process.env.SMTP_USER || "noreply@amoraresort.com"}>`,
-      to,
-      subject: `Booking Confirmed – ${formattedDate} at ${startTime}`,
+      from: `"Amora Contact" <${process.env.SMTP_USER || "noreply@amoraresort.com"}>`,
+      to: process.env.CONTACT_EMAIL || "info@amoraresort.com",
+      replyTo: email,
+      subject: `[Contact Form] ${subject}`,
       html,
     });
   } catch (error) {
-    // Log but don't throw — email failure shouldn't break payment flow
-    console.error("Failed to send booking confirmation email:", error);
+    console.error("Failed to send contact email:", error);
+    throw new Error("Failed to send email");
   }
 }

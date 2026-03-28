@@ -55,12 +55,24 @@ export async function GET(
       };
     });
 
+    // Generate invite code if missing (lazy migration)
+    if (!team.inviteCode) {
+      const { generateInviteCode } = await import("@/lib/teams");
+      const teamDoc = await Team.findById(id);
+      if (teamDoc) {
+        teamDoc.inviteCode = generateInviteCode();
+        await teamDoc.save();
+        (team as any).inviteCode = teamDoc.inviteCode;
+      }
+    }
+
     return NextResponse.json({
       team: {
         id: team._id.toString(),
         name: team.name,
         description: team.description || null,
         captainId: team.captainId.toString(),
+        inviteCode: team.inviteCode,
         myRole: membership?.role || (user.role === "admin" ? "admin" : null),
         createdAt: team.createdAt.toISOString(),
       },

@@ -61,16 +61,35 @@ export function generateTxRef(): string {
   return `AMORA-${timestamp}-${random}`;
 }
 
-/** Calculate the price for a booking based on duration and time */
-export function calculateBookingAmount(
+import SiteConfig from "@/models/SiteConfig";
+import dbConnect from "./mongodb";
+
+/** Calculate the price for a booking based on duration, time, and date */
+export async function calculateBookingAmount(
   startTime: string,
-  duration: number
-): number {
+  duration: number,
+  date: Date | string
+): Promise<number> {
+  await dbConnect();
+  let config = await SiteConfig.findOne().lean();
+  if (!config) {
+    config = await SiteConfig.create({});
+  }
+
   const hour = parseInt(startTime.split(":")[0], 10);
-  // Peak hours: Mon-Fri 4PM-10PM (16-22) + all weekends handled on frontend
-  // Simplified pricing: peak = 25000/hr, off-peak = 15000/hr
-  const isPeak = hour >= 16;
-  const hourlyRate = isPeak ? 25000 : 15000;
+  const d = new Date(date);
+  const isWeekend = d.getDay() === 0 || d.getDay() === 6; // 0=Sun, 6=Sat
+
+  let hourlyRate: number;
+
+  if (isWeekend) {
+    hourlyRate = config.pitchWeekendPrice;
+  } else {
+    // Peak hours: Mon-Fri 4PM (16:00) onwards
+    const isPeak = hour >= 16;
+    hourlyRate = isPeak ? config.pitchPeakPrice : config.pitchOffPeakPrice;
+  }
+
   return hourlyRate * (duration / 60);
 }
 

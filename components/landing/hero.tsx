@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function Hero() {
+interface HeroProps {
+  title?: string;
+  subtitle?: string;
+}
+
+export default function Hero({ title, subtitle }: HeroProps) {
   return (
     <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden bg-[#0a1a0f]">
       <div
@@ -18,13 +23,11 @@ export default function Hero() {
           Amora Resort &mdash; Port Harcourt, Nigeria
         </p>
         <h1 className="animate-fade-in-up-delay-1 mt-4 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-7xl">
-          Book Port Harcourt&apos; Premier
-          <br />
-          <span className="text-emerald-400">5-Aside Football Pitch</span>
+          {title || "Book Port Harcourt' Premier"}
+          {!title && <><br /><span className="text-emerald-400">5-Aside Football Pitch</span></>}
         </h1>
         <p className="animate-fade-in-up-delay-2 mx-auto mt-6 max-w-2xl text-lg text-gray-300 sm:text-xl">
-          Premium artificial turf, professional floodlights, and top-tier
-          facilities. The ultimate 5-aside experience awaits you.
+          {subtitle || "Premium artificial turf, professional floodlights, and top-tier facilities. The ultimate 5-aside experience awaits you."}
         </p>
         <div className="animate-fade-in-up-delay-3 mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button size="lg" asChild className="w-full sm:w-auto">

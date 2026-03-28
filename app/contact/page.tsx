@@ -1,17 +1,72 @@
 "use client";
 
+import { useState } from "react";
 import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Phone, MessageCircle, Mail } from "lucide-react";
-
-function handleSubmit(e: FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-}
+import { MapPin, Phone, MessageCircle, Mail, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ContactPage() {
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.details) {
+          // Validation errors
+          const firstError = Object.values(data.details)[0] as string[];
+          toast.error(firstError[0] || "Validation failed");
+        } else {
+          toast.error(data.error || "Failed to send message");
+        }
+        return;
+      }
+
+      toast.success(data.message);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
   return (
     <>
       {/* Hero */}
@@ -56,7 +111,13 @@ export default function ContactPage() {
                       >
                         First Name
                       </label>
-                      <Input id="firstName" placeholder="John" />
+                      <Input
+                        id="firstName"
+                        placeholder="John"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                     <div>
                       <label
@@ -65,7 +126,13 @@ export default function ContactPage() {
                       >
                         Last Name
                       </label>
-                      <Input id="lastName" placeholder="Doe" />
+                      <Input
+                        id="lastName"
+                        placeholder="Doe"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                   </div>
                   <div>
@@ -79,6 +146,9 @@ export default function ContactPage() {
                       id="email"
                       type="email"
                       placeholder="john@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
                     />
                   </div>
                   <div>
@@ -92,6 +162,9 @@ export default function ContactPage() {
                       id="phone"
                       type="tel"
                       placeholder="+234 800 000 0000"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
                     />
                   </div>
                   <div>
@@ -101,7 +174,13 @@ export default function ContactPage() {
                     >
                       Subject
                     </label>
-                    <Input id="subject" placeholder="Booking inquiry" />
+                    <Input
+                      id="subject"
+                      placeholder="Booking inquiry"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div>
                     <label
@@ -114,10 +193,20 @@ export default function ContactPage() {
                       id="message"
                       placeholder="Tell us how we can help..."
                       rows={5}
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    Send Message
+                  <Button type="submit" className="w-full" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      "Send Message"
+                    )}
                   </Button>
                 </form>
               </CardContent>
@@ -146,7 +235,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="text-lg font-semibold">Phone</h3>
                   <a
-                    href="tel:+2341234567890"
+                    href="tel:+2349136548549"
                     className="mt-1 block text-muted-foreground transition-colors hover:text-primary"
                   >
                     +234 913 654 8549
@@ -161,7 +250,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="text-lg font-semibold">WhatsApp</h3>
                   <a
-                    href="https://wa.me/2341234567890"
+                    href="https://wa.me/2349136548549"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-1 block text-muted-foreground transition-colors hover:text-primary"
@@ -188,10 +277,16 @@ export default function ContactPage() {
 
               {/* Map */}
               <div className="overflow-hidden rounded-xl border border-border">
-                <img
-                  alt="Amora Resort Location"
-                  src="/images/resort.jpg"
-                  className="h-[250px] w-full object-cover lg:h-[300px]"
+                <iframe
+                  title="Amora Resort Location"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3975.5!2d7.0134!3d4.8156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNMKwNDgnNTYuMiJOIDfCsDAwJzQ4LjIiRQ!5e0!3m2!1sen!2sng!4v1700000000000!5m2!1sen!2sng"
+                  width="100%"
+                  height="300"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="h-[250px] w-full lg:h-[300px]"
                 />
               </div>
             </div>

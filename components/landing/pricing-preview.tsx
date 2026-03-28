@@ -3,36 +3,41 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const pricingPlans = [
-  {
-    title: "Off-Peak Hours",
-    badge: "Best Value",
-    price: "15,000",
-    period: "per hour",
-    timeSlot: "Mon–Fri, 8AM–4PM",
-    features: [
-      "Full pitch access",
-      "Changing rooms included",
-      "Free parking",
-    ],
-  },
-  {
-    title: "Peak Hours",
-    badge: "Most Popular",
-    price: "25,000",
-    period: "per hour",
-    timeSlot: "Evenings & Weekends",
-    features: [
-      "Full pitch access",
-      "Floodlights included",
-      "Changing rooms included",
-      "Free parking",
-    ],
-    highlighted: true,
-  },
-];
+interface PricingPreviewProps {
+  offPeakPrice?: number;
+  peakPrice?: number;
+}
 
-export default function PricingPreview() {
+export default function PricingPreview({ offPeakPrice, peakPrice }: PricingPreviewProps) {
+  const pricingPlans = [
+    {
+      title: "Off-Peak Hours",
+      badge: "Best Value",
+      price: (offPeakPrice || 15000).toLocaleString(),
+      period: "per hour",
+      timeSlot: "Mon–Fri, 8AM–4PM",
+      features: [
+        "Full pitch access",
+        "Changing rooms included",
+        "Free parking",
+      ],
+    },
+    {
+      title: "Peak Hours",
+      badge: "Most Popular",
+      price: (peakPrice || 25000).toLocaleString(),
+      period: "per hour",
+      timeSlot: "Evenings & Weekends",
+      features: [
+        "Full pitch access",
+        "Floodlights included",
+        "Changing rooms included",
+        "Free parking",
+      ],
+      highlighted: true,
+    },
+  ];
+
   return (
     <section className="bg-muted/50 py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

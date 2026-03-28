@@ -4,6 +4,7 @@ import User from "@/models/User";
 import { signToken, setAuthCookie } from "@/lib/auth";
 import { registerSchema } from "@/lib/validations/auth";
 import { authLimiter } from "@/lib/rateLimit";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,6 +56,9 @@ export async function POST(request: NextRequest) {
     });
 
     await setAuthCookie(token);
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user.email, user.name).catch(console.error);
 
     return NextResponse.json(
       {

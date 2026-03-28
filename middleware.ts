@@ -5,7 +5,7 @@ const COOKIE_NAME = "amora_token";
 
 const protectedRoutes = ["/dashboard", "/profile"];
 const adminRoutes = ["/admin"];
-const authRoutes = ["/login", "/register"];
+const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
 
 function getSecret() {
   const secret = process.env.JWT_SECRET;
