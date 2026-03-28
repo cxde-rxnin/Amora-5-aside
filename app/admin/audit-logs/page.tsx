@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
-type EntityType = "booking" | "tournament" | "match" | "payment" | "team";
+type EntityType = "booking" | "tournament" | "match" | "payment" | "team" | "config";
 
 interface AuditLogEntry {
   id: string;
@@ -43,6 +43,7 @@ const ENTITY_COLORS: Record<
   match: "outline",
   payment: "destructive",
   team: "secondary",
+  config: "outline",
 };
 
 function formatAction(action: string) {
@@ -127,6 +128,7 @@ export default function AuditLogsPage() {
               <SelectItem value="match">Match</SelectItem>
               <SelectItem value="payment">Payment</SelectItem>
               <SelectItem value="team">Team</SelectItem>
+              <SelectItem value="config">Config</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -56,7 +56,7 @@ export async function PATCH(request: NextRequest) {
 
         await config.save();
 
-        await logAdminAction(user.id, "update_site_content", "system", config._id, {
+        await logAdminAction(user.id, "update_site_content", "config", config._id, {
             updatedFields: Object.keys(body).filter(k => allowedFields.includes(k)),
         });
 

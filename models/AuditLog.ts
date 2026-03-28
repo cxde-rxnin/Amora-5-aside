@@ -5,7 +5,8 @@ export type AuditEntityType =
   | "tournament"
   | "match"
   | "payment"
-  | "team";
+  | "team"
+  | "config";
 
 export interface IAuditLog extends Document {
   _id: mongoose.Types.ObjectId;
@@ -31,7 +32,7 @@ const auditLogSchema = new Schema<IAuditLog>(
     },
     entityType: {
       type: String,
-      enum: ["booking", "tournament", "match", "payment", "team"],
+      enum: ["booking", "tournament", "match", "payment", "team", "config"],
       required: true,
       index: true,
     },
